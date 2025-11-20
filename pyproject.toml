@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "setuptools-scm"]
-build-backend = "setuptools.build_meta"
+requires = ["rattler-build"]
+build-backend = "rattler_build.build"
 
 [project]
 name = "sleap"
@@ -24,7 +24,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Image Processing",
 ]
-dynamic = ["version", "readme"]
+version = "1.0.0"  # Static version for rattler-build
+readme = "README.md"
 dependencies = [
     "attrs",
     "omegaconf",
@@ -60,10 +61,6 @@ dependencies = [
     "sleap-io[all]>=0.5.7",
 ]
 
-[tool.setuptools.dynamic]
-version = {attr = "sleap.version.__version__"}
-readme = {file = ["README.md"], content-type="text/markdown"}
-
 [project.optional-dependencies]
 dev = [
     "pytest",
@@ -90,19 +87,7 @@ jupyter = [
 ]
 
 nn = [
-    "sleap-nn[torch]>=0.0.4"
-]
-
-nn-cpu = [
-    "sleap-nn[torch]>=0.0.4"
-]
-
-nn-cuda128 = [
-    "sleap-nn[torch]>=0.0.4"
-]
-
-nn-cuda118 = [
-    "sleap-nn[torch]>=0.0.4"
+    "sleap-nn>=0.0.4"
 ]
 
 [project.urls]
@@ -121,61 +106,18 @@ sleap-train = "sleap.legacy_cli_adaptors:train_command"
 sleap-track = "sleap.legacy_cli_adaptors:track_command"
 sleap-nn-train = "sleap.cli:train"
 sleap-nn-track = "sleap.cli:track"
-# sleap-export = "sleap.legacy_cli_adaptors:export_cli"
-
-[tool.uv]
-index-url = "https://download.pytorch.org/whl/cu128"
-extra-index-url = ["https://pypi.org/simple"]
-conflicts = [
-    [
-        { extra = "nn-cpu" },
-        { extra = "nn-cuda118" },
-        { extra = "nn-cuda128" }
-    ]
-]
-
-[tool.uv.sources]
-sleap-nn = [
-    { index = "pytorch-cpu", extra = "nn-cpu" },
-    { index = "pytorch-cu118", extra = "nn-cuda118" },
-    { index = "pytorch-cu128", extra = "nn-cuda128" },
-]
-markupsafe = { index = "pypi" }
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://pypi.org/simple"
-index-url = "https://pypi.org/simple"
-extra-index-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu118"
-url = "https://pypi.org/simple"
-index-url = "https://pypi.org/simple"
-extra-index-url = "https://download.pytorch.org/whl/cu118"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://pypi.org/simple"
-extra-index-url = "https://download.pytorch.org/whl/cu128"
-explicit = true
-
-[[tool.uv.index]]
-name = "pypi"
-url = "https://pypi.org/simple"
-explicit = true
 
 [tool.pixi.project]
-channels = ["conda-forge"]
-platforms = ["osx-64"]
+channels = ["conda-forge", "pytorch"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
 
-[tool.setuptools.packages.find]
-exclude = ["tests", "tests.*", "docs"]
+[tool.pixi.pypi-dependencies]
+sleap = { path = ".", editable = true }
 
-[tool.setuptools.package-data]
-"*" = ["*.ui", "*.txt", "*.md"]
+[tool.pixi.dependencies]
+python = ">=3.11,<3.14"
+pytorch = ">=2.0"
+torchvision = ">=0.15"
 
 [tool.ruff]
 line-length = 88
@@ -184,10 +126,10 @@ target-version = "py38"
 [tool.ruff.lint]
 select = ["E", "F", "W"]
 ignore = [
-    "E721",  # Use isinstance() for type comparisons
-    "E731",  # Do not assign a lambda expression
-    "E741",  # Ambiguous variable name
-    "F405",  # May be undefined, or defined from star imports
+    "E721",
+    "E731",
+    "E741",
+    "F405",
 ]
 
 [tool.ruff.lint.per-file-ignores]
